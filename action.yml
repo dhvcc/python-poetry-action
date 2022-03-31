@@ -7,12 +7,17 @@ description: Base action for python+poetry projects
 # TODO: outputs cache hit
 
 inputs:
+  checkout:
+    description: Whether to use basic checkout. Disable for more complex checkout usages
+    default: true
   # Cache
   cache-key:
     description: A key to use for cache
     required: true
   restore-keys:
     description: An ordered list of keys to fallback when cache-key missed
+  additional-cache:
+    description: Additional cache path entries
   # Other
   python-version:
     description: Python version
@@ -27,6 +32,7 @@ runs:
   using: composite 
   steps:
     - uses: actions/checkout@v3
+      if: inputs.checkout == 'true'
 
     - uses: actions/cache@v3
       id: pip-poetry-cache
@@ -39,6 +45,7 @@ runs:
           ~/.local
           # poetry-created venv
           .venv
+          ${{ inputs.additional-cache }}
         key: ${{ inputs.cache-key }}
         restore-keys: ${{ inputs.restore-keys }}
 
@@ -59,6 +66,6 @@ runs:
       run: poetry install
 
     - name: Add poetry to PATH
-      if: steps.pip-poetry-cache.outputs.cache-hit = 'true'
+      if: steps.pip-poetry-cache.outputs.cache-hit == 'true'
       run: echo "~/.local/bin" >>"$GITHUB_PATH"
 
