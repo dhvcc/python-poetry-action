@@ -63,9 +63,11 @@ runs:
 
     - name: Install dependencies
       if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
+      shell: bash
       run: poetry install
 
     - name: Add poetry to PATH
       if: steps.pip-poetry-cache.outputs.cache-hit == 'true'
+      shell: bash
       run: echo "~/.local/bin" >>"$GITHUB_PATH"
 
