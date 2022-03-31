@@ -1,11 +1,6 @@
 name: Python poetry setup action
 description: Base action for python+poetry projects
 
-# TODO: change .local cache
-# TODO: venv input
-# TODO: make sure pip has PATH set up if using cache
-# TODO: outputs cache hit
-
 inputs:
   checkout:
     description: Whether to use basic checkout. Disable for more complex checkout usages
@@ -22,11 +17,14 @@ inputs:
   python-version:
     description: Python version
     required: true
+    default: '3.x'
   poetry-version:
     description: Poetry version
-  pre-commit:
-    description: Whether to cache pre-commit
-    default: false
+    default: latest
+
+outputs:
+  cache-hit:
+    description: Pip poetry cache hit status
 
 runs:
   using: composite 
@@ -41,8 +39,11 @@ runs:
           ~/.cache/pip
           ~/.cache/pre-commit
           ~/.cache/pypoetry
-          # there is only poetry at this point
-          ~/.local
+          # poetry installation
+          ~/.local/VERSION
+          ~/.local/bin/poetry
+          ~/.local/share/virtualenv
+          ~/.local/venv
           # poetry-created venv
           .venv
           ${{ inputs.additional-cache }}
@@ -58,6 +59,7 @@ runs:
       if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1.3.1
       with:
+        version: ${{ inputs.poetry-version }}
         virtualenvs-create: true
         virtualenvs-in-project: true
 
@@ -69,5 +71,10 @@ runs:
     - name: Add poetry to PATH
       if: steps.pip-poetry-cache.outputs.cache-hit == 'true'
       shell: bash
-      run: echo "~/.local/bin" >>"$GITHUB_PATH"
+      run: echo "$HOME/.local/bin" >>"$GITHUB_PATH"
+
+    - name: Set outputs
+      shell: bash
+      run: |
+        echo ::set-output name=cache-hit::${{ steps.pip-poetry-cache.outputs.cache-hit }}
 
