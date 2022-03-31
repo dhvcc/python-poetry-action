@@ -21,6 +21,9 @@ inputs:
   poetry-version:
     description: Poetry version
     default: latest
+  install-command:
+    description: Dependency install command
+    default: poetry install
 
 outputs:
   cache-hit:
@@ -66,7 +69,7 @@ runs:
     - name: Install dependencies
       if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: poetry install
+      run: ${{ inputs.install-command }}
 
     - name: Add poetry to PATH
       if: steps.pip-poetry-cache.outputs.cache-hit == 'true'
