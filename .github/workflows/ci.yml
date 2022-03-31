@@ -21,7 +21,7 @@ jobs:
           - 3.9
 
     steps:
-      - uses: dhvcc/python-poetry-setup@v1
+      - uses: dhvcc/python-poetry-setup@master
         with:
           python-version: ${{ matrix.python-version }}
           cache-key: ${{ matrix.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/poetry.lock') }}
