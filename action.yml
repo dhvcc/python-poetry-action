@@ -40,15 +40,15 @@ runs:
       with:
         path: |
           ~/.cache/pip
+          #~/AppData/Local/pip/cache
           ~/.cache/pre-commit
           ~/.cache/pypoetry
           # poetry installation
-          ~/.local/VERSION
-          ~/.local/bin/poetry
-          ~/.local/share/virtualenv
-          ~/.local/venv
-          # poetry-created venv
+          ~/.local
+          ~/AppData/Roaming/Python/Scripts
+          # venv
           .venv
+          # additional
           ${{ inputs.additional-cache }}
         key: ${{ inputs.cache-key }}
         restore-keys: ${{ inputs.restore-keys }}
@@ -57,24 +57,42 @@ runs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python-version }}
+        #cache: 'poetry'
 
     - name: Install poetry
-      if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
+      #if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1.3.1
       with:
         version: ${{ inputs.poetry-version }}
         virtualenvs-create: true
         virtualenvs-in-project: true
 
+    - name: Add poetry to UNIX PATH
+      if: steps.pip-poetry-cache.outputs.cache-hit == 'true' && runner.os != 'Windows'
+      shell: bash
+      run: |
+        echo "~/.local/bin" >>"$GITHUB_PATH"
+
+    - name: Add poetry to Windows PATH
+      if: steps.pip-poetry-cache.outputs.cache-hit == 'true' && runner.os == 'Windows'
+      shell: bash
+      run: |
+        echo "~/AppData/Roaming/Python/Scripts" >>"$GITHUB_PATH"
+
     - name: Install dependencies
-      if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
+      #if: steps.pip-poetry-cache.outputs.cache-hit != 'true'
       shell: bash
       run: ${{ inputs.install-command }}
 
-    - name: Add poetry to PATH
-      if: steps.pip-poetry-cache.outputs.cache-hit == 'true'
+    - name: debug
       shell: bash
-      run: echo "$HOME/.local/bin" >>"$GITHUB_PATH"
+      run: |
+        choco install tree
+        pip --version
+        #tree -L 2 ~/AppData/Local
+        #tree -L 2 ~/AppData/Roaming/Python/Scripts
+        tree -L 2 '~/Application Data'
+        #env | grep PATH
 
     - name: Set outputs
       shell: bash
