@@ -1,4 +1,4 @@
-name: Python poetry action
+name: Python poetry setup action
 description: Base action for python+poetry projects
 
 # TODO: change .local cache

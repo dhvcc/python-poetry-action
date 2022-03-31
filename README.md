@@ -1,4 +1,4 @@
-# Python poetry action
+# Python poetry setup action
 
 Action that allows you to quickly set-up python and poetry with caching included.
 
